@@ -19,6 +19,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -49,7 +50,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.text.input.KeyboardType
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -70,7 +70,12 @@ class MainActivity : ComponentActivity() {
 fun TipTimeLayout() {
     var amountInput by remember {mutableStateOf("")}
     val amount = amountInput.toDoubleOrNull() ?:0.0 //?:0.0はamountInputがnullの場合に0.0を返すElvis演算子
-    val tip = calculateTip(amount)
+
+    var tipInput by remember { mutableStateOf("") }
+    val tipPercent = tipInput.toDoubleOrNull() ?:0.0
+
+    val tip = calculateTip(amount, tipPercent)
+
 
     Column(
         modifier = Modifier
@@ -87,11 +92,22 @@ fun TipTimeLayout() {
                 .align(alignment = Alignment.Start)
         )
         EditNumberField(
+            label = R.string.bill_amount,
             value = amountInput,
             onValueChange = {amountInput = it},//ラムダコールバック。ユーザーがテキストフィールドにテキストを入力すると、ここが呼び出される。ユーザーが入力した値はこのitに入ってくる。
+
             modifier = Modifier
-              .padding(bottom = 32.dp)
-              .fillMaxWidth())
+                .padding(bottom = 32.dp)
+                .fillMaxWidth())
+
+        EditNumberField(
+            label =  R.string.how_was_the_service,
+            value = tipInput,
+            onValueChange = {tipInput = it},
+            modifier = Modifier
+                .padding(bottom = 32.dp)
+                .fillMaxWidth()
+        )
         Text(
             text = stringResource(R.string.tip_amount, tip),
             style = MaterialTheme.typography.displaySmall
@@ -102,6 +118,7 @@ fun TipTimeLayout() {
 
 @Composable
 fun EditNumberField(
+    @StringRes label: Int,
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -111,7 +128,7 @@ fun EditNumberField(
         value = value,
         onValueChange = onValueChange,
         modifier = modifier,
-        label = { Text(stringResource(id = R.string.bill_amount))},
+        label = { Text(stringResource(id = label))},
         singleLine = true,//複数行ではなく、水平方向にスクロールできる１行になる。
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
     )
